@@ -1,0 +1,140 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="cn1.api.wfblog.net - WeiFeng API">
+    <title>BiliBili AV To BV</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/jquery@2.1.1/dist/jquery.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="panel panel-light" weight="50%">
+        <div class="panel-heading">
+            <h3 class="panel-title"><span class="glyphicon glyphicon-tags"></span> BV号 ⇆ AV号</h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-group form-inline">
+				<label>AV号：</label>
+                <input type="text" class="form-control" id="av" placeholder="请输入视频AV号">
+	            <button class="btn btn-default" onclick="return av() && false">AV To BV</button>
+            </div>
+			<div class="form-group form-inline">
+                <label>BV号：</label>
+                <input type="text" class="form-control" id="bv" placeholder="请输入视频BV号">
+				<button class="btn btn-default" onclick="return bv() && false">BV To AV</button>
+            </div>
+			<hr style="display:none" id="dis_hr">
+			<p style="display:none" id="dis_p"><span style="display:block" id="av_value"></span><span style="display:block" id="bv_value"></span><button class="btn btn-default" onclick="open_bilibili('value');">Open</button><br> ↓ <br><span style="display:block" id="bv_result"></span><span style="display:block" id="av_result"></span><button class="btn btn-default" onclick="open_bilibili('result');">Open</button></p>
+			<div id="clear" style="display:none">
+			<hr>
+			<button class="btn btn-default" onclick="return clear_text() && false">Clear</button>
+			</div>
+        </div>
+    </div>
+</body>
+<script>
+const table = [...'fZodR9XQDSUm21yCkr6zBqiveYah8bt4xsWpHnJE7jL5VG3guMTKNPAwcF'];
+const s = [11, 10, 3, 8, 4, 6];
+const xor = 177451812;
+const add = 8728348608;
+
+const av2bv = (av) => {
+    let num = NaN;
+    if (Object.prototype.toString.call(av) === '[object Number]') {
+        num = av;
+    } else if (Object.prototype.toString.call(av) === '[object String]') {
+        num = parseInt(av.replace(/[^0-9]/gu, ''));
+    };
+    if (isNaN(num) || num <= 0) {
+        return '请输入正确内容';
+    };
+
+    num = (num ^ xor) + add;
+    let result = [...'BV1  4 1 7  '];
+    let i = 0;
+    while (i < 6) {
+        result[s[i]] = table[Math.floor(num / 58 ** i) % 58];
+        i += 1;
+    };
+    return result.join('');
+};
+
+const bv2av = (bv) => {
+    let str = '';
+    if (bv.length === 12) {
+        str = bv;
+    } else if (bv.length === 10) {
+        str = `BV${bv}`;
+    } else if (bv.length === 9) {
+        str = `BV1${bv}`;
+    } else {
+        return '请输入正确内容';
+    };
+    if (!str.match(/[Bb][Vv][fZodR9XQDSUm21yCkr6zBqiveYah8bt4xsWpHnJE7jL5VG3guMTKNPAwcF]{10}/gu)) {
+        return '请输入正确内容';
+    };
+
+    let result = 0;
+    let i = 0;
+    while (i < 6) {
+        result += table.indexOf(str[s[i]]) * 58 ** i;
+        i += 1;
+    };
+    return `av${result - add ^ xor}`;
+};
+
+const av = () => {
+    document.getElementById('dis_hr').style.display = "";
+    document.getElementById('dis_p').style.display = "";
+	document.getElementById('clear').style.display = "";
+	document.getElementById('bv_value').style.display = "none";
+    document.getElementById('av_result').style.display = "none";
+	document.getElementById('av_value').style.display = "block";
+    document.getElementById('bv_result').style.display = "block";
+	document.getElementById('av_value').innerText = `${document.getElementById('av').value}`;
+    document.getElementById('bv_result').innerText = `${av2bv(document.getElementById('av').value)}`;
+};
+
+const bv = () => {
+    document.getElementById('dis_hr').style.display = "";
+    document.getElementById('dis_p').style.display = "";
+	document.getElementById('clear').style.display = "";
+	document.getElementById('av_value').style.display = "none";
+    document.getElementById('bv_result').style.display = "none";
+	document.getElementById('bv_value').style.display = "block";
+    document.getElementById('av_result').style.display = "block";
+	document.getElementById('bv_value').innerText = `${document.getElementById('bv').value}`;
+    document.getElementById('av_result').innerText = `${bv2av(document.getElementById('bv').value)}`;
+};
+
+const clear_text = () => {
+    document.getElementById('av').value = "";
+	document.getElementById('bv').value = "";
+    document.getElementById('dis_hr').style.display = "none";
+    document.getElementById('dis_p').style.display = "none";
+	document.getElementById('av_value').style.display = "none";
+    document.getElementById('bv_result').style.display = "none";
+	document.getElementById('bv_value').style.display = "none";
+    document.getElementById('av_result').style.display = "none";
+	document.getElementById('clear').style.display = "none";
+};
+
+function open_bilibili(k){
+    if(k == 'value'){
+	    if(document.getElementById('av_value').style.display != 'none'){
+		    movie_id = document.getElementById('av_value').innerText;
+		}else{
+		    movie_id = document.getElementById('bv_value').innerText;
+		}
+	}else if(k == 'result'){
+	    if(document.getElementById('av_result').style.display != 'none'){
+		    movie_id = document.getElementById('av_result').innerText;
+		}else{
+		    movie_id = document.getElementById('bv_result').innerText;
+		}
+	}
+	window.open('https://www.bilibili.com/video/' + movie_id);
+}
+</script>
+</html>
